@@ -20,12 +20,12 @@ function run(msg, matches)
   if msg.to.type ~= 'chat' then 
     return
   end
-  if not is_momod(msg) then
-    return
-  end
-  --if not is_admin(msg) then -- For admins only !
-    --return 'Only admins can invite.'
+  --if not is_momod(msg) then
+   -- return
   --end
+  if not is_admin(msg) then -- For admins only !
+    return 
+  end
 	local cbres_extra = {chatid = msg.to.id}
   local username = matches[1]
   local username = username:gsub("@","")

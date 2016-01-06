@@ -13,6 +13,12 @@ local function pairsByKeys (t, f)
       return iter
     end
 
+local function member_ct(extra, success, result)
+    local chat_id = extra.receiver
+    local mem_num = '['..result.id..'] '..result.title..'.\n'
+                 ..result.members_num..' members.\n\n'
+end
+
 local function chat_list(msg)
     local data = load_data(_config.moderation.data)
         local groups = 'groups'
@@ -20,15 +26,26 @@ local function chat_list(msg)
                 return 'No groups at the moment'
         end
         local message = 'List of Groups:\n*Use /join (ID) to join*\n\n '
+        local chat = {name =
+                     {id = {}
+  }
+}
+        local a = l
         for k,v in pairs(data[tostring(groups)]) do
+                table.insert(chat, v)                  --local receiver = k
+                                                               --local mem_num = chat_info(receiver, members_ct,{receiver=receiver})
                 local settings = data[tostring(v)]['settings']
-                for m,n in pairsByKeys(settings) do
+                for m,n in pairs(settings) do
                         if m == 'set_name' then
-                                name = n
+                             chat_name = n
+                             table.insert(chat, chat_name)
                         end
                 end
+         for i,e in pairsByKeys(chat) do
+            print(i, e)
+         end
 
-                message = message .. '👥 '.. name .. ' (ID: ' .. v .. ')\n\n '
+                --message = message .. '👥 '.. e ..' (ID: ' .. i .. ')\n\n '
         end
         local file = io.open("./groups/lists/listed_groups.txt", "w")
         file:write(message)
@@ -76,10 +93,10 @@ function run(msg, matches)
        if is_admin(msg) and msg.to.type == 'chat' then
          chat_list(msg)
          send_document("chat#id"..msg.from.id, "./groups/lists/listed_groups.txt", ok_cb, false)
-       elseif msg.to.type ~= 'chat' then
+       elseif msg.to.type == 'user' then
          chat_list(msg)
          send_document("user#id"..msg.from.id, "./groups/lists/listed_groups.txt", ok_cb, false) 
-       end      
+       end
        end
      end
   end

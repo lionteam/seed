@@ -26,7 +26,7 @@ function get_receiver(msg)
 end
 
 function is_chat_msg( msg )
-  if msg.to.type == 'chat' then
+  if msg.to.type == 'chat' or msg.to.type == 'channel' then
     return true
   end
   return false
@@ -569,6 +569,23 @@ file:close()
 
 end
 
+--Check if this chat is a log group or not
+function is_log_group(msg)
+  local var = false
+  local groups = 'groups'
+  local data = load_data(_config.moderation.data)
+  local chat = msg.to.id
+  if data[tostring(groups)] then
+    if data[tostring(groups)][tostring(msg.to.id)] then
+      log_group = data[tostring(groups)][tostring(msg.to.id)]['log_group']
+      if log_group == 'yes' then
+       var = true
+      end
+       return var
+     end
+   end
+end
+
 function user_print_name(user)
    if user.print_name then
       return user.print_name
@@ -834,6 +851,7 @@ end
 
 -- /id by reply
 function get_message_callback_id(extra, success, result)
+vardump(result)
     if result.to.type == 'chat' then
         local chat = 'chat#id'..result.to.id
         send_large_msg(chat, result.from.id)

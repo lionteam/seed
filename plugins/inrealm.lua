@@ -20,6 +20,7 @@ local function create_realm(msg)
         end
 end
 
+
 local function killchat(cb_extra, success, result)
   local receiver = cb_extra.receiver
   local chat_id = "chat#id"..result.id
@@ -392,6 +393,34 @@ local function username_id(cb_extra, success, result)
    send_large_msg(receiver, text)
 end
 
+local function set_log_group(msg)
+  if not is_admin(msg) then
+    return 
+  end
+  local log_group = data[tostring(groups)][tostring(msg.to.id)]['log_group']
+  if log_group == 'yes' then
+    return 'Log group is already set'
+  else
+    data[tostring(groups)][tostring(msg.to.id)]['log_group'] = 'yes'
+    save_data(_config.moderation.data, data)
+    return 'Log group has been set'
+  end
+end
+
+local function unset_log_group(msg)
+  if not is_admin(msg) then
+    return 
+  end
+  local log_group = data[tostring(groups)][tostring(msg.to.id)]['log_group']
+  if log_group == 'no' then
+    return 'Log group is already disabled'
+  else
+    data[tostring(groups)][tostring(msg.to.id)]['log_group'] = 'no'
+    save_data(_config.moderation.data, data)
+    return 'log group has been disabled'
+  end
+end
+
 function run(msg, matches)
     --vardump(msg)
     if matches[1] == 'creategroup' and matches[2] then
@@ -498,6 +527,12 @@ chat_info(receiver, returnids, {receiver=receiver})
 
 	    end 
         end
+              if matches[1] == 'set' then
+                if matches[2] == 'loggroup' then
+                   savelog(msg.to.id, name_log.." ["..msg.from.id.."] set as log group")
+                  return set_log_group(msg)
+                end
+              end
                 if matches[1] == 'kill' and matches[2] == 'chat' then
                   if not is_admin(msg) then
                      return nil
@@ -566,11 +601,11 @@ chat_info(receiver, returnids, {receiver=receiver})
 		if matches[1] == 'list' and matches[2] == 'groups' then
                   if msg.to.type == 'chat' then
 			groups_list(msg)
-		        send_document("chat#id"..msg.to.id, "./groups/groups.txt", ok_cb, false)	
+		        send_document("chat#id"..msg.to.id, "./groups/lists/groups.txt", ok_cb, false)	
 			return "Group list created" --group_list(msg)
                    elseif msg.to.type == 'user' then 
                         groups_list(msg)
-		        send_document("user#id"..msg.from.id, "./groups/groups.txt", ok_cb, false)	
+		        send_document("user#id"..msg.from.id, "./groups/lists/groups.txt", ok_cb, false)	
 			return "Group list created" --group_list(msg)
                   end
 		end

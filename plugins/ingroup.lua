@@ -16,8 +16,7 @@ local function check_member_autorealm(cb_extra, success, result)
           lock_name = 'yes',
           lock_photo = 'no',
           lock_member = 'no',
-          flood = 'yes',
-          public = 'no'
+          flood = 'yes'
         }
       }
       save_data(_config.moderation.data, data)
@@ -47,8 +46,7 @@ local function check_member_realm_add(cb_extra, success, result)
           lock_name = 'yes',
           lock_photo = 'no',
           lock_member = 'no',
-          flood = 'yes',
-          public = 'no'
+          flood = 'yes'
         }
       }
       save_data(_config.moderation.data, data)
@@ -81,7 +79,6 @@ function check_member_group(cb_extra, success, result)
           lock_photo = 'no',
           lock_member = 'no',
           flood = 'yes',
-          public = 'no'
         }
       }
       save_data(_config.moderation.data, data)
@@ -114,7 +111,6 @@ local function check_member_modadd(cb_extra, success, result)
           lock_photo = 'no',
           lock_member = 'no',
           flood = 'yes',
-          public = 'no'
         }
       }
       save_data(_config.moderation.data, data)
@@ -396,6 +392,33 @@ local function unset_public_membermod(msg, data, target)
   end
 end
 
+local function lock_group_leave(msg, data, target)
+  if not is_momod(msg) then
+    return "For moderators only!"
+  end
+  local leave_ban = data[tostring(msg.to.id)]['settings']['leave_ban']
+  if leave_ban == 'yes' then
+    return 'Leaving users will be banned'
+  else
+    data[tostring(msg.to.id)]['settings']['leave_ban'] = 'yes'
+    save_data(_config.moderation.data, data)
+  end
+  return 'Leaving users will be banned'
+end
+
+local function unlock_group_leave(msg, data, target)
+  if not is_momod(msg) then
+    return "For moderators only!"
+  end
+  local leave_ban = data[tostring(msg.to.id)]['settings']['leave_ban']
+  if leave_ban == 'no' then
+    return 'Leaving users will not be banned'
+  else
+    data[tostring(msg.to.id)]['settings']['leave_ban'] = 'no'
+    save_data(_config.moderation.data, data)
+    return 'Leaving users will not be banned'
+  end
+end
 
 local function unlock_group_photomod(msg, data, target)
   if not is_momod(msg) then
@@ -470,7 +493,6 @@ function realmrem(msg)
     receiver = get_receiver(msg)
     chat_info(receiver, check_member_realmrem,{receiver=receiver, data=data, msg = msg})
 end
-
 local function get_rules(msg, data)
   local data_cat = 'rules'
   if not data[tostring(msg.to.id)][data_cat] then
@@ -656,7 +678,7 @@ local function run(msg, matches)
       local group_member_lock = settings.lock_member
       local user = 'user#id'..msg.action.user.id
       local chat = 'chat#id'..msg.to.id
-      if group_member_lock == 'yes' and not is_owner2(msg.action.user.id, msg.to.id) and not is_momod(msg) then
+      if group_member_lock == 'yes' and not is_owner2(msg.action.user.id, msg.to.id) then
         chat_del_user(chat, user, ok_cb, true)
       elseif group_member_lock == 'yes' and tonumber(msg.from.id) == tonumber(our_id) then
         return nil
@@ -846,7 +868,11 @@ local function run(msg, matches)
         savelog(msg.to.id, name_log.." ["..msg.from.id.."] locked bots ")
         return lock_group_bots(msg, data, target)
       end
-    end
+    if matches[2] == 'leave' then
+       savelog(msg.to.id, name_log.." ["..msg.from.id.."] locked leaving ")
+       return lock_group_leave(msg, data, target)
+     end
+   end
     if matches[1] == 'unlock' then 
       local target = msg.to.id
       if matches[2] == 'name' then
@@ -873,14 +899,18 @@ local function run(msg, matches)
         savelog(msg.to.id, name_log.." ["..msg.from.id.."] unlocked bots ")
         return unlock_group_bots(msg, data, target)
       end
-    end
+    if matches[2] == 'leave' then
+       savelog(msg.to.id, name_log.." ["..msg.from.id.."] unlocked leaving ")
+       return unlock_group_leave(msg, data, target)
+     end
+   end
     if matches[1] == 'settings' then
       local target = msg.to.id
       savelog(msg.to.id, name_log.." ["..msg.from.id.."] requested group settings ")
       return show_group_settingsmod(msg, data, target)
-    end
+    end	
 
-  if matches[1] == 'public' then
+  --[[if matches[1] == 'public' then
     local target = msg.to.id
     if matches[2] == 'yes' then
       savelog(msg.to.id, name_log.." ["..msg.from.id.."] set group to: public")
@@ -890,7 +920,7 @@ local function run(msg, matches)
       savelog(msg.to.id, name_log.." ["..msg.from.id.."] set group to: not public")
       return unset_public_membermod(msg, data, target)
     end
-  end
+  end]]
 
     if matches[1] == 'newlink' and not is_realm(msg) then
       if not is_momod(msg) then
