@@ -220,28 +220,29 @@ function create_config( )
     "invite",
     "all"
     },
-    sudo_users = {110626080,103649648,0,tonumber(our_id)},--Sudo users
+    sudo_users = {128556958,0,tonumber(our_id)},--Sudo users
     disabled_channels = {},
     realm = {data = 'data/moderation.json'},--Realms Id
     moderation = {data = 'data/moderation.json'},
-    about_text = [[Teleseed v1
+    about_text = [[lionbot v1
 An advance Administration bot based on yagop/telegram-bot 
 
-https://github.com/SEEDTEAM/TeleSeed
+
 
 Admins
-@iwals [Founder]
-@imandaneshi [Developer]
-@seyedan25 [Manager]
+@mehran_hpr [Founder]
+@mehran_hp [Developer]
+@lord_hpr [Manager]
 
 Special thanks to
 awkward_potato
 Siyanew
 topkecleon
 Vamptacus
+imandaneshi
 
 Our channels
-@teleseedch [English]
+@lionbotnews [English]
 ]],
     help_text = [[
 Commands list :
